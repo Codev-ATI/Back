@@ -3,6 +3,7 @@ var stompClient = null;
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
     $("#disconnect").prop("disabled", !connected);
+    $("#ready").prop("disabled", !connected);
     if (connected) {
         $("#conversation").show();
     }
@@ -13,14 +14,15 @@ function setConnected(connected) {
 }
 
 function connect() {
-    var socket = new SockJS('/websocket-example');
+    var socket = new SockJS('rooms');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/user', function (greeting) {
-            showGreeting(JSON.parse(greeting.body).content);
+        stompClient.subscribe('/topic/messages' , function (greeting) {
+            showGreeting(greeting);
         });
+        stompClient.send("/app/rooms/join", {}, JSON.stringify({'roomId': '1', 'userId': '1'}));
     });
 }
 
@@ -33,7 +35,20 @@ function disconnect() {
 }
 
 function sendName() {
-    stompClient.send("/app/user", {}, JSON.stringify({'name': $("#name").val()}));
+    stompClient.send("/app/rooms", {}, JSON.stringify({'name': $("#name").val()}));
+}
+
+function joinRoom() {
+    connect()
+}
+
+function leaveRoom() {
+    stompClient.send("/app/rooms/leave", {}, JSON.stringify({'roomId': '1', 'userId': '1'}));
+    disconnect()
+}
+
+function readyRoom() {
+    stompClient.send("/app/rooms/ready", {}, JSON.stringify({'roomId': '1', 'userId': '1'}));
 }
 
 function showGreeting(message) {
@@ -44,7 +59,7 @@ $(function () {
     $("form").on('submit', function (e) {
         e.preventDefault();
     });
-    $( "#connect" ).click(function() { connect(); });
-    $( "#disconnect" ).click(function() { disconnect(); });
-    $( "#send" ).click(function() { sendName(); });
+    $( "#connect" ).click(function() { joinRoom(); });
+    $( "#disconnect" ).click(function() { leaveRoom(); });
+    $( "#ready" ).click(function() { readyRoom(); });
 });
