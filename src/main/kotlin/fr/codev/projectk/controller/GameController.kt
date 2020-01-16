@@ -18,4 +18,6 @@ class GameController {
     public fun createGame(): String {
         return roomManager.createGame()
     }
+
+    //TODO ID OWNER TITRE -> LISTE
 }
