@@ -1,5 +1,6 @@
 package fr.codev.projectk.rooms
 
+import fr.codev.projectk.model.Quiz
 import fr.codev.projectk.model.User
 import org.springframework.stereotype.Service
 import java.lang.StringBuilder
@@ -13,25 +14,34 @@ class RoomsManager {
 
     // TODO: Remove for a real application
     constructor() {
-        roomsList["1"] = Room()
+        roomsList["1"] = Room("1")
     }
 
-    public fun joinRoom(roomId: String, user: User) {
+    fun joinRoom(roomId: String, user: User): Quiz? {
         var room = roomsList[roomId]
 
-        room!!.join(user);
+        if (room != null) {
+            room.join(user)
+            return room.getQuiz()
+        }
+
+        return null
     }
 
-    public fun leaveRoom(roomId: String, userId: String) {
+    fun leaveRoom(roomId: String, userId: String): Boolean {
         var room = roomsList[roomId]
 
-        room!!.leave(userId);
+        if (room != null) {
+            room!!.leave(userId)
+        }
+
+        return false
     }
 
     /*
     Return : roomId: String
      */
-    public fun createGame(): String {
+    fun createGame(id : String): String {
         var builder = StringBuilder()
         var rand = Random()
         var number = 0
@@ -39,7 +49,7 @@ class RoomsManager {
         for(i in 1..4) {
             number = rand.nextInt(36)
 
-            number += if (number > 10) {
+            number += if (number > 9) {
                 55
             } else {
                 48
@@ -50,8 +60,14 @@ class RoomsManager {
 
         var generateId = builder.toString()
 
-        roomsList[generateId] = Room()
+        roomsList[generateId] = Room(id)
 
         return generateId
+    }
+
+    fun ready(roomId: String, userId: String) {
+        var room = roomsList[roomId]
+
+        room?.setReady(userId)
     }
 }

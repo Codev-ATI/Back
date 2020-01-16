@@ -1,5 +1,6 @@
 package fr.codev.projectk.rooms
 
+import fr.codev.projectk.model.Quiz
 import fr.codev.projectk.model.User
 import fr.codev.projectk.robj.ContentMessage
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,11 +16,9 @@ public class RoomsController() {
 
     @MessageMapping("/rooms/join")
     @SendTo("/topic/messages")
-    public fun joinRoom(message: ContentMessage): String {
+    public fun joinRoom(message: ContentMessage): Quiz? {
 
-       roomManager.joinRoom(message.roomId, User(message.userId))
-
-        return "HELLO";
+        return roomManager.joinRoom(message.roomId, User(message.userId))
     }
 
     @MessageMapping("/rooms/leave")
@@ -33,10 +32,17 @@ public class RoomsController() {
 
     @MessageMapping("/rooms/ready")
     @SendTo("/topic/messages")
-    public fun readyUser(message: ContentMessage): String {
+    public fun readyUser(message: ContentMessage) {
+
+        roomManager.ready(message.roomId, message.userId)
+    }
+
+    @MessageMapping("/rooms/echo")
+    @SendTo("/topic/messages")
+    public fun readyUser(): String {
 
         // TODO: complete fun content
 
-        return "READY";
+        return "ECHO";
     }
 }
