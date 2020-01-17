@@ -19,7 +19,6 @@ class GameService {
 
     fun getGames(page: Pageable): List<ShortQuiz> {
 
-        var newPage = quizRepository.findAll(page)
-        return newPage.get().map { t -> ShortQuiz(t.id, t.title, t.owner) }.toList()
+        return shortQuizRepository.findAll(page).get().toList()
     }
 }
