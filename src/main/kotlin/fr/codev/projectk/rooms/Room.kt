@@ -19,12 +19,12 @@ class Room(id : String) {
     }
 
     fun leave(userId: String) {
-        users.remove(users.find { user -> user.id.equals(userId) })
+        users.remove(users.find { user -> user.pseudo.equals(userId) })
     }
 
-    private fun indexOfId(userId: String): Int? {
+    private fun indexOfId(pseudo: String): Int? {
         for (i: Int in 0 until users.size - 1) {
-            if (users[i].id == userId)
+            if (users[i].pseudo == pseudo)
                 return i
         }
 
