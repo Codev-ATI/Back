@@ -7,9 +7,9 @@ class Room(id : String) {
 
     private var users: ArrayList<User> = ArrayList()
     private var ready: ArrayList<Boolean> = ArrayList()
-    private var  quiz: Quiz = Quiz(id);
+    private var  quiz: Quiz? = null
 
-    fun getQuiz(): Quiz {
+    fun getQuiz(): Quiz? {
         return quiz
     }
 
