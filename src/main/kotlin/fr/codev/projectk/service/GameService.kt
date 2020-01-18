@@ -21,4 +21,9 @@ class GameService {
 
         return shortQuizRepository.findAll(page).get().toList()
     }
+
+    fun createQuiz(quiz: Quiz): Quiz {
+        if (quiz.id == null) quiz.id = 2;
+        return quizRepository.save(quiz);
+    }
 }

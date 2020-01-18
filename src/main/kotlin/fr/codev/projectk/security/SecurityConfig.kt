@@ -26,7 +26,7 @@ class SecurityConfig(@field:Autowired private val loginService: LoginService) : 
         http.csrf().disable()
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         http.authorizeRequests()
-                .antMatchers("/login*", "/register*").permitAll()
+                .antMatchers("/login*", "/register*", "/createQuiz*").permitAll()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .anyRequest().authenticated()
         http.apply(JwtTokenFilterConfigurer(loginService))
@@ -34,7 +34,7 @@ class SecurityConfig(@field:Autowired private val loginService: LoginService) : 
     }
 
     override fun configure(web: WebSecurity) {
-        web.ignoring().antMatchers("/login*", "/register*")
+        web.ignoring().antMatchers("/login*", "/register*", "/createQuiz*")
                 .antMatchers(HttpMethod.OPTIONS, "/**")
     }
 
