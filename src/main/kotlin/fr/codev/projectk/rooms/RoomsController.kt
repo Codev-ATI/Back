@@ -1,9 +1,10 @@
 package fr.codev.projectk.rooms
 
-import fr.codev.projectk.model.Quiz
-import fr.codev.projectk.model.User
-import fr.codev.projectk.robj.ContentMessage
+import fr.codev.projectk.robj.AnswerDTO
+import fr.codev.projectk.robj.PlayerStatus
+import fr.codev.projectk.robj.SingleAnswer
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.messaging.handler.annotation.DestinationVariable
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.stereotype.Controller
@@ -14,35 +15,24 @@ public class RoomsController() {
     @Autowired
     lateinit var roomManager: RoomsManager
 
-    @MessageMapping("/rooms/join")
-    @SendTo("/topic/messages")
-    public fun joinRoom(message: ContentMessage): Quiz? {
+    @MessageMapping("/rooms/join/{roomId}")
+    @SendTo("/topic/messages/{roomId}")
+    public fun joinRoom(@DestinationVariable roomId: String, pseudo: String): List<PlayerStatus>? {
 
-        return roomManager.joinRoom(message.roomId, User(message.userId))
+        return roomManager.joinRoom(roomId, pseudo)
     }
 
-    @MessageMapping("/rooms/leave")
-    @SendTo("/topic/messages")
-    public fun leaveRoom(message: ContentMessage): String {
+    @MessageMapping("/rooms/ready/{roomId}")
+    @SendTo("/topic/messages/{roomId}")
+    public fun readyUser(@DestinationVariable roomId: String, pseudo: String): List<PlayerStatus>? {
 
-        roomManager.leaveRoom(message.roomId, message.userId)
-
-        return "BYE";
+        return roomManager.ready(roomId, pseudo)
     }
 
-    @MessageMapping("/rooms/ready")
-    @SendTo("/topic/messages")
-    public fun readyUser(message: ContentMessage) {
+    @MessageMapping("/rooms/answer/{roomId}")
+    @SendTo("/topic/messages/{roomId}")
+    public fun answer(@DestinationVariable roomId: String, answer: AnswerDTO) {
 
-        roomManager.ready(message.roomId, message.userId)
-    }
-
-    @MessageMapping("/rooms/echo")
-    @SendTo("/topic/messages")
-    public fun readyUser(): String {
-
-        // TODO: complete fun content
-
-        return "ECHO";
+        roomManager.answer(roomId, answer.pseudo, answer.questionId, answer.answer)
     }
 }

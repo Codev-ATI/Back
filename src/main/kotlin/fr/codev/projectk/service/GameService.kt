@@ -21,4 +21,8 @@ class GameService {
 
         return shortQuizRepository.findAll(page).get().toList()
     }
+
+    fun getQuiz(id: String): Quiz {
+        return quizRepository.findById(id).get()
+    }
 }

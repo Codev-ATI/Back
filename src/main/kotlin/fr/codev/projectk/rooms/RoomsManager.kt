@@ -2,40 +2,34 @@ package fr.codev.projectk.rooms
 
 import fr.codev.projectk.model.Quiz
 import fr.codev.projectk.model.User
+import fr.codev.projectk.robj.PlayerStatus
+import fr.codev.projectk.service.GameService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.HashMap
+import kotlin.concurrent.thread
 
 @Service
 class RoomsManager {
 
+    @Autowired
+    private lateinit var taskRunner: RoomNRTasks
+
+    @Autowired
+    private lateinit var gameService: GameService
+
     private var roomsList: HashMap<String, Room> = hashMapOf();
 
-    // TODO: Remove for a real application
-    constructor() {
-        roomsList["1"] = Room("1")
-    }
-
-    fun joinRoom(roomId: String, user: User): Quiz? {
+    fun joinRoom(roomId: String, pseudo: String): List<PlayerStatus>? {
         var room = roomsList[roomId]
 
-        if (room != null) {
-            room.join(user)
-            return room.getQuiz()
+        if (room != null && room.isNotHere(pseudo)) {
+            return room.join(pseudo)
         }
 
         return null
-    }
-
-    fun leaveRoom(roomId: String, userId: String): Boolean {
-        var room = roomsList[roomId]
-
-        if (room != null) {
-            room!!.leave(userId)
-        }
-
-        return false
     }
 
     /*
@@ -60,14 +54,44 @@ class RoomsManager {
 
         var generateId = builder.toString()
 
-        roomsList[generateId] = Room(id)
+        roomsList[generateId] = Room(generateId, gameService.getQuiz(id))
 
         return generateId
     }
 
-    fun ready(roomId: String, userId: String) {
+    @Synchronized fun ready(roomId: String, pseudo: String): List<PlayerStatus>? {
         var room = roomsList[roomId]
 
-        room?.setReady(userId)
+        var list = room?.setReady(pseudo)
+
+        thread {
+            if (room?.allReady()!!) {
+                gameThread(roomId, room)
+            }
+        }
+
+        return list
+    }
+
+    fun answer(roomId: String, pseudo: String, questionId: Int, answer: Int) {
+        var room = roomsList[roomId]
+
+        room?.answer(pseudo, questionId, answer)
+    }
+
+    fun gameThread(roomId: String, room: Room) {
+        Thread.sleep(3000)
+        taskRunner.sendNextQuestion(roomId, room.getNextQuestion())
+
+        Thread.sleep(5_000)
+
+        taskRunner.sendAnswer(roomId, room.getAnswer())
+
+        if (room.existNextQuestion()) {
+            gameThread(roomId, room)
+        } else {
+            taskRunner.sendStats(roomId, room.giveMeStats())
+            roomsList.remove(roomId)
+        }
     }
 }
