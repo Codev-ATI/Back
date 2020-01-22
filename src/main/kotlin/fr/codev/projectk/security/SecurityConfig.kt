@@ -19,23 +19,21 @@ import java.util.*
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-class SecurityConfig(@field:Autowired private val loginService: LoginService) : WebSecurityConfigurerAdapter() {
+class SecurityConfig(@Autowired private val loginService: LoginService) : WebSecurityConfigurerAdapter() {
 
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
         http.csrf().disable()
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         http.authorizeRequests()
-//                .antMatchers("/login*", "/register*").permitAll() TODO: Configure routes
-                .antMatchers("/**").permitAll()
-                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .anyRequest().authenticated()
+                .antMatchers("/auth/**").denyAll()
+                .anyRequest().permitAll()
         http.apply(JwtTokenFilterConfigurer(loginService))
         http.exceptionHandling().accessDeniedPage("/login")
     }
 
     override fun configure(web: WebSecurity) {
-        web.ignoring().antMatchers("/login*", "/register*", "/**")
+        web.ignoring().antMatchers("/login*", "/register*", "/app/**")
                 .antMatchers(HttpMethod.OPTIONS, "/**")
     }
 
@@ -46,10 +44,10 @@ class SecurityConfig(@field:Autowired private val loginService: LoginService) : 
         configuration.allowedMethods = Arrays.asList("HEAD",
                 "GET", "POST", "PUT", "DELETE", "PATCH")
         // setAllowCredentials(true) is important, otherwise:
-// The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*' when the request's credentials mode is 'include'.
+        // The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*' when the request's credentials mode is 'include'.
         configuration.allowCredentials = true
         // setAllowedHeaders is important! Without it, OPTIONS preflight request
-// will fail with 403 Invalid CORS request
+        // will fail with 403 Invalid CORS request
         configuration.allowedHeaders = Arrays.asList("Authorization", "Cache-Control", "Content-Type", "Accept")
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)

@@ -9,6 +9,7 @@ import fr.codev.projectk.security.CustomUserDetails
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -17,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.security.Key
 import java.time.Instant
 import java.util.*
 import javax.servlet.http.HttpServletRequest
@@ -27,16 +29,17 @@ class LoginService(@field:Autowired private val userRepository: UserRepository,
                    @field:Autowired private val appProperties: AppProperties,
                    @field:Autowired private val encoder: PasswordEncoder) {
 
-    private val key: String
+    private val key: String = appProperties.secret!!
     private val algorithm: SignatureAlgorithm
     private val expirationPlus: Long = 10800000
+    private val keyObj: Key
     // METHODS FOR CONTROLLER
     fun login(email: String?, password: String?): String {
         val user = userRepository.findByEmail(email)
         return if (encoder.matches(password, user?.password)) {
             Jwts.builder()
                     .setSubject(email)
-                    .signWith(algorithm, key)
+                    .signWith(keyObj)
                     .setExpiration(Date.from(Instant.now().plusMillis(expirationPlus)))
                     .compact()
         } else {
@@ -46,18 +49,17 @@ class LoginService(@field:Autowired private val userRepository: UserRepository,
 
     // METHODS FOR SECURITY
     fun register(email: String?, password: String?) {
-        var password = password
         if (userRepository.findByEmail(email) != null) {
             throw SNException("Username already exists !", HttpStatus.BAD_REQUEST, SpecialCode.LOGIN_USERNAME_ALREADY_EXISTS)
         }
-        password = encoder.encode(password)
-        val user = User(email!!, password)
+        var passwordVar = encoder.encode(password)
+        val user = User(email!!, passwordVar)
         userRepository.save(user)
     }
 
     @Throws(JwtException::class)
     fun parseToken(token: String?): Authentication {
-        val username = Jwts.parser().setSigningKey(key).parseClaimsJws(token).body.subject
+        val username = Jwts.parser().setSigningKey(keyObj).parseClaimsJws(token).body.subject
         val userDetails = userDetailsService.loadUserByUsername(username)
         return UsernamePasswordAuthenticationToken(userDetails, "", userDetails.authorities)
     }
@@ -78,7 +80,8 @@ class LoginService(@field:Autowired private val userRepository: UserRepository,
 
     init {
         // 3 hours = 10 800 000 ms
-        key = appProperties.secret!!
+        keyObj = Keys.hmacShaKeyFor(key.toByteArray())
+
         algorithm = SignatureAlgorithm.HS256
     }
 }

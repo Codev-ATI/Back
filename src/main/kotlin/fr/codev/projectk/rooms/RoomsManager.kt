@@ -38,7 +38,7 @@ class RoomsManager {
     fun createGame(id : String): String {
         var builder = StringBuilder()
         var rand = Random()
-        var number = 0
+        var number: Int
 
         for(i in 1..4) {
             number = rand.nextInt(36)
@@ -54,7 +54,7 @@ class RoomsManager {
 
         var generateId = builder.toString()
 
-        roomsList[generateId] = Room(generateId, gameService.getQuiz(id))
+        roomsList[generateId] = Room(gameService.getQuiz(id))
 
         return generateId
     }

@@ -6,14 +6,14 @@ import fr.codev.projectk.robj.EndGameStats
 import fr.codev.projectk.robj.PlayerAnswer
 import fr.codev.projectk.robj.PlayerStatus
 
-class Room(id : String) {
+class Room() {
 
     private var users: ArrayList<PlayerStatus> = ArrayList()
     private lateinit var  quiz: Quiz
     private var actualQuestion: Int = -1
     private var answers: List<PlayerAnswer> = ArrayList()
 
-    constructor(id: String, quiz: Quiz) : this(id) {
+    constructor(quiz: Quiz) : this() {
         this.quiz = quiz
         this.quiz.questions.shuffle()
     }
@@ -69,11 +69,11 @@ class Room(id : String) {
 
     fun getNextQuestion(): SimpleQuestion {
 
-        return quiz.questions?.get(++actualQuestion)?.let { question -> SimpleQuestion(question.question, question.answeres) }!!
+        return quiz.questions[++actualQuestion].let { question -> SimpleQuestion(question.question, question.answeres) }
     }
 
     fun getAnswer():Int {
-        return (quiz.questions!!.get(actualQuestion).correct!!)
+        return (quiz.questions[actualQuestion].correct!!)
     }
 
     fun existNextQuestion(): Boolean {
@@ -84,7 +84,7 @@ class Room(id : String) {
         return answers.map { playerAnswer ->
             var scoreCounter = 0
             playerAnswer.answerlist.forEach {
-                if (it.answer == quiz.questions!!.get(it.id).correct)
+                if (it.answer == quiz.questions[it.id].correct)
                     scoreCounter++
             }
 
