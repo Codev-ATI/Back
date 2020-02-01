@@ -1,7 +1,7 @@
 package fr.codev.projectk.controller
 
-import fr.codev.projectk.model.Quiz
 import fr.codev.projectk.model.ShortQuiz
+import fr.codev.projectk.robj.PlayerInfos
 import fr.codev.projectk.rooms.RoomsManager
 import fr.codev.projectk.service.GameService
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,8 +11,9 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
+import kotlin.NoSuchElementException
 
-@RestController
+@RestController("/app")
 class GameController {
 
     @Autowired
@@ -26,7 +27,23 @@ class GameController {
      */
     @GetMapping("/createGame/{id}")
     public fun createGame(@PathVariable id: String): ResponseEntity<String> {
-        return ResponseEntity(roomManager.createGame(id), HttpStatus.OK)
+
+        try {
+            var id: String = roomManager.createGame(id)
+            return ResponseEntity(id, HttpStatus.OK)
+        } catch (e: NoSuchElementException) {
+            return ResponseEntity("", HttpStatus.NOT_FOUND)
+        }
+    }
+
+    @GetMapping("/joinGame/{roomId}/{pseudo}")
+    public fun createGame(@PathVariable roomId: String, @PathVariable pseudo: String): ResponseEntity<PlayerInfos> {
+
+        try {
+            return ResponseEntity(roomManager.joinRoom(roomId, pseudo), HttpStatus.OK)
+        } catch (e: NoSuchElementException) {
+            return ResponseEntity(HttpStatus.BAD_REQUEST)
+        }
     }
 
     @GetMapping("/game")

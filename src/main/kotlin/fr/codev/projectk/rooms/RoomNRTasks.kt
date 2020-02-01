@@ -2,6 +2,7 @@ package fr.codev.projectk.rooms
 
 import fr.codev.projectk.model.SimpleQuestion
 import fr.codev.projectk.robj.EndGameStats
+import fr.codev.projectk.robj.PlayerStatus
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
@@ -11,6 +12,10 @@ class RoomNRTasks {
 
     @Autowired
     private lateinit var simpMessage: SimpMessagingTemplate
+
+    fun sendStatus(roomId: String, status: List<PlayerStatus>) {
+        this.simpMessage.convertAndSend("/topic/messages/" + roomId, status)
+    }
     
     fun sendNextQuestion(roomId: String, question: SimpleQuestion) {
         this.simpMessage.convertAndSend("/topic/messages/" + roomId, question)

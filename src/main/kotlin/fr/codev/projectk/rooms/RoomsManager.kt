@@ -2,12 +2,14 @@ package fr.codev.projectk.rooms
 
 import fr.codev.projectk.model.Quiz
 import fr.codev.projectk.model.User
+import fr.codev.projectk.robj.PlayerInfos
 import fr.codev.projectk.robj.PlayerStatus
 import fr.codev.projectk.service.GameService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.lang.StringBuilder
 import java.util.*
+import kotlin.NoSuchElementException
 import kotlin.collections.HashMap
 import kotlin.concurrent.thread
 
@@ -22,14 +24,16 @@ class RoomsManager {
 
     private var roomsList: HashMap<String, Room> = hashMapOf();
 
-    fun joinRoom(roomId: String, pseudo: String): List<PlayerStatus>? {
+    fun  joinRoom(roomId: String, pseudo: String): PlayerInfos {
         var room = roomsList[roomId]
 
-        if (room != null && room.isNotHere(pseudo)) {
-            return room.join(pseudo)
+        if (room == null) {
+            throw NoSuchElementException()
         }
 
-        return null
+        taskRunner.sendStatus(roomId, room!!.getStatus());
+
+        return room?.join(pseudo)!!
     }
 
     /*
@@ -59,10 +63,14 @@ class RoomsManager {
         return generateId
     }
 
-    @Synchronized fun ready(roomId: String, pseudo: String): List<PlayerStatus>? {
+    @Synchronized fun ready(roomId: String, id: Int): List<PlayerStatus>? {
         var room = roomsList[roomId]
 
-        var list = room?.setReady(pseudo)
+        if(room == null || room!!.inGame()) {
+            return null
+        }
+
+        var list = room?.setReady(id)
 
         thread {
             if (room?.allReady()!!) {
@@ -73,18 +81,33 @@ class RoomsManager {
         return list
     }
 
-    fun answer(roomId: String, pseudo: String, questionId: Int, answer: Int) {
+    fun answer(roomId: String, id: Int, questionId: Int, answer: Int) {
         var room = roomsList[roomId]
 
-        room?.answer(pseudo, questionId, answer)
+        if (room == null || !room!!.inGame()) {
+            return
+        }
+
+        room?.answer(id, questionId, answer)
+
+        if (room?.everyoneAnswered(questionId)) {
+            questionEnding(roomId, room)
+        }
     }
 
     fun gameThread(roomId: String, room: Room) {
         Thread.sleep(3000)
         taskRunner.sendNextQuestion(roomId, room.getNextQuestion())
+        var qIndex = room.getActualQuestionIndex()
 
-        Thread.sleep(5_000)
+        Thread.sleep(30_000)
 
+        if (qIndex == room.getActualQuestionIndex()) {
+            questionEnding(roomId, room)
+        }
+    }
+
+    private fun questionEnding(roomId: String, room: Room) {
         taskRunner.sendAnswer(roomId, room.getAnswer())
 
         if (room.existNextQuestion()) {

@@ -1,75 +1,96 @@
 package fr.codev.projectk.rooms
 
+import fr.codev.projectk.enum.State
+import fr.codev.projectk.model.Question
 import fr.codev.projectk.model.Quiz
 import fr.codev.projectk.model.SimpleQuestion
-import fr.codev.projectk.robj.EndGameStats
-import fr.codev.projectk.robj.PlayerAnswer
-import fr.codev.projectk.robj.PlayerStatus
+import fr.codev.projectk.robj.*
 
 class Room(id : String) {
 
-    private var users: ArrayList<PlayerStatus> = ArrayList()
+    private var users: HashMap<Int, PlayerStatus> = HashMap()
     private lateinit var  quiz: Quiz
     private var actualQuestion: Int = -1
-    private var answers: List<PlayerAnswer> = ArrayList()
+    private var answers: HashMap<Int, ArrayList<PlayerAnswer>> = HashMap()
+
+    private var STATE: State = State.WAITING;
 
     constructor(id: String, quiz: Quiz) : this(id) {
         this.quiz = quiz
         this.quiz.questions.shuffle()
+
+        for (i in this.quiz.questions.indices) {
+            answers.put(i, ArrayList<PlayerAnswer>())
+        }
+    }
+
+    fun inGame(): Boolean {
+        return STATE.equals(State.GAME)
+    }
+
+    fun getStatus(): List<PlayerStatus> {
+        return users.values.toList()
     }
 
     fun getQuiz(): Quiz {
         return quiz
     }
 
-    fun join(pseudo: String): List<PlayerStatus> {
-        users.add(PlayerStatus(pseudo, false))
-        answers = ArrayList<PlayerAnswer>()
+    fun join(pseudo: String): PlayerInfos {
+        users.put(users.size, PlayerStatus(users.size, pseudo, false))
 
-        return users
+        var status: PlayerStatus = users[users.size - 1]!!
+
+        return PlayerInfos(status.id, status.pseudo)
     }
 
-    fun isReady(pseudo: String): Boolean {
-        return users.find { playerStatus -> playerStatus.pseudo == pseudo }!!.ready
+    fun isReady(id: Int): Boolean {
+        return users.get(id)!!.ready
     }
 
-    fun isNotHere(pseudo: String): Boolean {
-        return users.find { playerStatus -> playerStatus.pseudo == pseudo } == null
+    fun isNotHere(id: Int): Boolean {
+        return users.get(id) == null
     }
 
-    fun leave(pseudo: String) {
-        users.remove(users.find { user -> user.pseudo.equals(pseudo) })
+    fun leave(id: Int) {
+        users.remove(id)
     }
 
-    private fun indexOfId(pseudo: String): Int? {
-        for (i: Int in 0 until users.size - 1) {
-            if (users[i].pseudo == pseudo)
-                return i
-        }
+    fun setReady(id: Int): List<PlayerStatus> {
+        users.get(id)!!.ready = true
 
-        return null
-    }
-
-    fun setReady(pseudo: String): List<PlayerStatus> {
-        users.find { playerStatus -> playerStatus.pseudo == pseudo }!!.ready = true
-
-        return users
+        return users.values.toList()
     }
 
     fun allReady():Boolean {
-        var ready: Boolean = true
-        users.forEach { user -> ready = ready && user.ready }
+        var ready = true
+        users.values.forEach { user -> ready = ready && user.ready }
+
+        if (ready) {
+            STATE = State.GAME
+        }
 
         return ready
     }
 
-    fun answer(pseudo: String, questionId: Int, answer: Int) {
-        answers.find { playerAnswer -> playerAnswer.pseudo == pseudo }?.addAnswer(questionId, answer)
+    fun answer(id: Int, questionId: Int, answer: Int) {
+        answers.get(questionId)?.add(PlayerAnswer(id, answer))
+    }
+
+    fun everyoneAnswered(questionId: Int): Boolean {
+
+        var bool = answers[questionId]?.size == users.size
+
+        return bool
     }
 
     fun getNextQuestion(): SimpleQuestion {
 
-        return quiz.questions?.get(++actualQuestion)?.let { question -> SimpleQuestion(question.question, question.answeres) }!!
+        return quiz.questions?.get(++actualQuestion)?.let { question -> SimpleQuestion(actualQuestion, question.question, question.answeres) }!!
+    }
+
+    fun getActualQuestionIndex(): Int {
+        return actualQuestion
     }
 
     fun getAnswer():Int {
@@ -81,14 +102,21 @@ class Room(id : String) {
     }
 
     fun giveMeStats(): List<EndGameStats> {
-        return answers.map { playerAnswer ->
-            var scoreCounter = 0
-            playerAnswer.answerlist.forEach {
-                if (it.answer == quiz.questions!!.get(it.id).correct)
-                    scoreCounter++
-            }
 
-            EndGameStats(playerAnswer.pseudo, scoreCounter)
+        var stats = ArrayList<EndGameStats>();
+
+        for (i in users.values.indices) {
+            stats.add(EndGameStats(i, users[i]!!.pseudo, 0))
         }
+
+        answers.forEach { key, value ->
+            for (answer in value) {
+                if (quiz.questions[key].correct == answer.answer) {
+                    stats[answer.userId].increment()
+                }
+            }
+        }
+
+        return stats;
     }
 }
