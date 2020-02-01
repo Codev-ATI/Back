@@ -13,9 +13,9 @@ class CustomUserDetails(@field:Autowired var userRepository: UserRepository) : U
 
     @Throws(UsernameNotFoundException::class)
     override fun loadUserByUsername(email: String): UserDetails {
-        val (_, email, password) = userRepository.findByEmail(email)
+        val (_, emailVar, password) = userRepository.findByEmail(email)
                 ?: throw UsernameNotFoundException("User $email not found.")
-        return User.withUsername(email)
+        return User.withUsername(emailVar)
                 .password(password)
                 .authorities("SimpleUser")
                 .build()
