@@ -19,8 +19,11 @@ class Room(id : String) {
         this.quiz = quiz
         this.quiz.questions.shuffle()
 
+        this.quiz.questions.forEach { question: Question -> question.answers?.shuffle() }
+
         for (i in this.quiz.questions.indices) {
             answers.put(i, ArrayList<PlayerAnswer>())
+
         }
     }
 

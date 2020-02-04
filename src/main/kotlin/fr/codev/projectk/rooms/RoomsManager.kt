@@ -119,7 +119,6 @@ class RoomsManager {
 
     private fun questionEnding(roomId: String, room: Room) {
         taskRunner.sendAnswer(roomId, room.getAnswer())
-        taskRunner.sendStats(roomId, room.giveMeStats())
 
         if (room.existNextQuestion()) {
             gameThread(roomId, room)
