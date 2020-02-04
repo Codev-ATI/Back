@@ -86,7 +86,7 @@ class Room(id : String) {
 
     fun getNextQuestion(): SimpleQuestion {
 
-        return quiz.questions?.get(++actualQuestion)?.let { question -> SimpleQuestion(actualQuestion, question.question, question.answeres) }!!
+        return quiz.questions?.get(++actualQuestion)?.let { question -> SimpleQuestion(actualQuestion, question.question, question.answers) }!!
     }
 
     fun getActualQuestionIndex(): Int {
