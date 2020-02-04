@@ -1,5 +1,6 @@
 package fr.codev.projectk.controller
 
+import fr.codev.projectk.model.Quiz
 import fr.codev.projectk.model.ShortQuiz
 import fr.codev.projectk.robj.PlayerInfos
 import fr.codev.projectk.rooms.RoomsManager
