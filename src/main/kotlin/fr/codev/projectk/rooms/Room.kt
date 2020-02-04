@@ -41,7 +41,7 @@ class Room(id : String) {
 
         var status: PlayerStatus = users[users.size - 1]!!
 
-        return PlayerInfos(status.id, status.pseudo)
+        return PlayerInfos(status.id, status.pseudo, quiz.title, quiz.questions.size)
     }
 
     fun isReady(id: Int): Boolean {

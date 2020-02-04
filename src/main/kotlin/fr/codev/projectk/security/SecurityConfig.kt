@@ -33,7 +33,7 @@ class SecurityConfig(@Autowired private val loginService: LoginService) : WebSec
     }
 
     override fun configure(web: WebSecurity) {
-        web.ignoring().antMatchers("/login*", "/register*", "/app/**", "/rooms/**")
+        web.ignoring().antMatchers("/login*", "/register*", "/app/**", "/rooms/**", "/trace", "/actuator/**")
                 .antMatchers(HttpMethod.OPTIONS, "/**")
     }
 

@@ -1,7 +1,3 @@
 package fr.codev.projectk.model
 
-class Answer () {
-
-    private var index: String? = ""
-    private var answere: String? = ""
-}
+data class Answer (var index: String? = "", var answer: String? = "")

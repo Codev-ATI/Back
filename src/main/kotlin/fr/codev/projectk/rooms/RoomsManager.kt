@@ -36,6 +36,16 @@ class RoomsManager {
         return room?.join(pseudo)!!
     }
 
+    fun status(roomId: String): List<PlayerStatus>? {
+        var room = roomsList[roomId]
+
+        if(room == null || room!!.inGame()) {
+            return null
+        }
+
+        return room.getStatus()
+    }
+
     /*
     Return : roomId: String
      */
@@ -109,6 +119,7 @@ class RoomsManager {
 
     private fun questionEnding(roomId: String, room: Room) {
         taskRunner.sendAnswer(roomId, room.getAnswer())
+        taskRunner.sendStats(roomId, room.giveMeStats())
 
         if (room.existNextQuestion()) {
             gameThread(roomId, room)
