@@ -56,4 +56,11 @@ class GameController {
     fun createQuiz(@RequestBody quiz: Quiz): ResponseEntity<Quiz> {
         return ResponseEntity(gamesService.createQuiz(quiz), HttpStatus.OK)
     }
+
+    @GetMapping("/clear")
+    fun clearRooms(page: Pageable): ResponseEntity<String> {
+        gamesService.clearRooms()
+
+        return ResponseEntity("Done", HttpStatus.OK)
+    }
 }

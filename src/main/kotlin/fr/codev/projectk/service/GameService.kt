@@ -4,6 +4,7 @@ import fr.codev.projectk.model.Quiz
 import fr.codev.projectk.model.ShortQuiz
 import fr.codev.projectk.repository.QuizRepository
 import fr.codev.projectk.repository.ShortQuizRepository
+import fr.codev.projectk.rooms.RoomsManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -16,6 +17,8 @@ class GameService {
     private lateinit var quizRepository: QuizRepository
     @Autowired
     private lateinit var shortQuizRepository: ShortQuizRepository
+    @Autowired
+    lateinit var roomManager: RoomsManager
 
     fun getGames(page: Pageable): List<ShortQuiz> {
 
@@ -29,5 +32,9 @@ class GameService {
 
     fun getQuiz(id: String): Quiz {
         return quizRepository.findById(id).get()
+    }
+
+    fun clearRooms() {
+        roomManager.clearRooms()
     }
 }

@@ -34,4 +34,10 @@ public class RoomsController() {
 
         roomManager.answer(roomId, answer.id, answer.questionId, answer.answer)
     }
+
+    @MessageMapping("/rooms/quit/{roomId}")
+    public fun quit(@DestinationVariable roomId: String, id: String) {
+
+        roomManager.quit(roomId, Integer.parseInt(id))
+    }
 }

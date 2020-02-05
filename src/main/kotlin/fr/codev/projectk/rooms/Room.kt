@@ -10,7 +10,7 @@ class Room(id : String) {
 
     private var users: HashMap<Int, PlayerStatus> = HashMap()
     private lateinit var  quiz: Quiz
-    private var actualQuestion: Int = -1
+    private var actualQuestion: Int = 0
     private var answers: HashMap<Int, ArrayList<PlayerAnswer>> = HashMap()
 
     private var STATE: State = State.WAITING;
@@ -45,6 +45,10 @@ class Room(id : String) {
         var status: PlayerStatus = users[users.size - 1]!!
 
         return PlayerInfos(status.id, status.pseudo, quiz.title, quiz.questions.size)
+    }
+
+    fun quit(id: Int) {
+        users.remove(id)
     }
 
     fun isReady(id: Int): Boolean {
@@ -87,9 +91,13 @@ class Room(id : String) {
         return bool
     }
 
+    fun nextQuestion() {
+        actualQuestion++
+    }
+
     fun getNextQuestion(): SimpleQuestion {
 
-        return quiz.questions?.get(++actualQuestion)?.let { question -> SimpleQuestion(actualQuestion, question.question, question.answers) }!!
+        return quiz.questions?.get(actualQuestion)?.let { question -> SimpleQuestion(actualQuestion, question.question, question.answers) }!!
     }
 
     fun getActualQuestionIndex(): Int {
@@ -120,6 +128,6 @@ class Room(id : String) {
             }
         }
 
-        return stats;
+        return stats.sortedByDescending { endGameStats -> endGameStats.score }
     }
 }

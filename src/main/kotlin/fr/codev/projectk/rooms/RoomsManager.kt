@@ -36,6 +36,24 @@ class RoomsManager {
         return room?.join(pseudo)!!
     }
 
+    fun  quit(roomId: String, id: Int) {
+        var room = roomsList[roomId]
+
+        if (room == null) {
+            throw NoSuchElementException()
+        }
+
+        room.quit(id)
+
+        var status =  room!!.getStatus()
+
+        if (status == null || status.isEmpty()) {
+            roomsList.remove(roomId)
+        } else {
+            taskRunner.sendStatus(roomId, status)
+        }
+    }
+
     fun status(roomId: String): List<PlayerStatus>? {
         var room = roomsList[roomId]
 
@@ -69,6 +87,16 @@ class RoomsManager {
         var generateId = builder.toString()
 
         roomsList[generateId] = Room(generateId, gameService.getQuiz(id))
+
+        thread {
+            Thread.sleep(600_000)
+
+            var room = roomsList[generateId]
+
+            if (room == null || room.inGame()) {
+                roomsList.remove(generateId)
+            }
+        }
 
         return generateId
     }
@@ -121,10 +149,25 @@ class RoomsManager {
         taskRunner.sendAnswer(roomId, room.getAnswer())
 
         if (room.existNextQuestion()) {
+            room.nextQuestion()
             gameThread(roomId, room)
         } else {
+            // Just to block main timer execution
+            room.nextQuestion()
+
+            Thread.sleep(3_000)
             taskRunner.sendStats(roomId, room.giveMeStats())
             roomsList.remove(roomId)
         }
+    }
+
+
+
+
+    /// GLOBAL MANAGEMENT
+
+
+    fun clearRooms() {
+        roomsList.clear()
     }
 }
