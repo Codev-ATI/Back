@@ -23,6 +23,7 @@ import java.security.Key
 import java.time.Instant
 import java.util.*
 import javax.servlet.http.HttpServletRequest
+import kotlin.collections.HashMap
 
 @Service
 class LoginService(@field:Autowired private val userRepository: UserRepository,
@@ -38,8 +39,11 @@ class LoginService(@field:Autowired private val userRepository: UserRepository,
     fun login(email: String?, password: String?): Credentials {
         val user = userRepository.findByEmail(email)
         if (encoder.matches(password, user?.password)) {
+            var claims = HashMap<String, String?>()
+            claims["sub"] = user?.pseudo
+            claims["email"] = user?.email
             val token = Jwts.builder()
-                    .setSubject(user?.pseudo)
+                    .setClaims(claims as Map<String, Any>?)
                     .signWith(keyObj)
                     .setExpiration(Date.from(Instant.now().plusMillis(expirationPlus)))
                     .compact()
@@ -62,8 +66,8 @@ class LoginService(@field:Autowired private val userRepository: UserRepository,
 
     @Throws(JwtException::class)
     fun parseToken(token: String?): Authentication {
-        val username = Jwts.parser().setSigningKey(keyObj).parseClaimsJws(token).body.subject
-        val userDetails = userDetailsService.loadUserByUsername(username)
+        val email = Jwts.parser().setSigningKey(keyObj).parseClaimsJws(token).body["email"].toString()
+        val userDetails = userDetailsService.loadUserByUsername(email)
         return UsernamePasswordAuthenticationToken(userDetails, "", userDetails.authorities)
     }
 
