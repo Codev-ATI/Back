@@ -11,32 +11,32 @@ import org.springframework.stereotype.Controller
 import javax.print.attribute.IntegerSyntax
 
 @Controller
-public class RoomsController() {
+class RoomsController {
 
     @Autowired
     lateinit var roomManager: RoomsManager
 
     @MessageMapping("/rooms/status/{roomId}")
     @SendTo("/topic/players/{roomId}")
-    public fun statusRoom(@DestinationVariable roomId: String): List<PlayerStatus>? {
+    fun statusRoom(@DestinationVariable roomId: String): List<PlayerStatus>? {
 
         return roomManager.status(roomId)
     }
 
     @MessageMapping("/rooms/ready/{roomId}")
     @SendTo("/topic/players/{roomId}")
-    public fun readyUser(@DestinationVariable roomId: String, id: String): List<PlayerStatus>? {
+    fun readyUser(@DestinationVariable roomId: String, id: String): List<PlayerStatus>? {
         return roomManager.ready(roomId, id)
     }
 
     @MessageMapping("/rooms/answer/{roomId}")
-    public fun answer(@DestinationVariable roomId: String, answer: AnswerDTO) {
+    fun answer(@DestinationVariable roomId: String, answer: AnswerDTO) {
 
         roomManager.answer(roomId, answer.id, answer.questionId, answer.answer)
     }
 
     @MessageMapping("/rooms/quit/{roomId}")
-    public fun quit(@DestinationVariable roomId: String, id: String) {
+    fun quit(@DestinationVariable roomId: String, id: String) {
 
         roomManager.quit(roomId, id)
     }

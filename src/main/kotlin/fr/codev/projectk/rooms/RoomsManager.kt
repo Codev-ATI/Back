@@ -22,7 +22,7 @@ class RoomsManager {
     @Autowired
     private lateinit var gameService: GameService
 
-    private var roomsList: HashMap<String, Room> = hashMapOf();
+    private var roomsList: HashMap<String, Room> = hashMapOf()
 
     fun  joinRoom(roomId: String, pseudo: String): PlayerInfos {
         var room = roomsList[roomId]
@@ -31,9 +31,9 @@ class RoomsManager {
             throw NoSuchElementException()
         }
 
-        taskRunner.sendStatus(roomId, room!!.getStatus());
+        taskRunner.sendStatus(roomId, room.getStatus())
 
-        return room?.join(pseudo)!!
+        return room.join(pseudo)
     }
 
     fun  quit(roomId: String, id: String) {
@@ -45,7 +45,7 @@ class RoomsManager {
 
         room.quit(id)
 
-        var status =  room!!.getStatus()
+        var status =  room.getStatus()
 
         if (status == null || status.isEmpty()) {
             roomsList.remove(roomId)
@@ -57,7 +57,7 @@ class RoomsManager {
     fun status(roomId: String): List<PlayerStatus>? {
         var room = roomsList[roomId]
 
-        if(room == null || room!!.inGame()) {
+        if(room == null || room.inGame()) {
             return null
         }
 
@@ -104,14 +104,14 @@ class RoomsManager {
     @Synchronized fun ready(roomId: String, id: String): List<PlayerStatus>? {
         var room = roomsList[roomId]
 
-        if(room == null || room!!.inGame()) {
+        if(room == null || room.inGame()) {
             return null
         }
 
-        var list = room?.setReady(id)
+        var list = room.setReady(id)
 
         thread {
-            if (room?.allReady()!!) {
+            if (room.allReady()) {
                 gameThread(roomId, room)
             }
         }
@@ -122,13 +122,13 @@ class RoomsManager {
     fun answer(roomId: String, userId: String, questionId: Int, answer: Int) {
         var room = roomsList[roomId]
 
-        if (room == null || !room!!.inGame()) {
+        if (room == null || !room.inGame()) {
             return
         }
 
-        room?.answer(userId, questionId, answer)
+        room.answer(userId, questionId, answer)
 
-        if (room?.everyoneAnswered(questionId)) {
+        if (room.everyoneAnswered(questionId)) {
             questionEnding(roomId, room)
         }
     }

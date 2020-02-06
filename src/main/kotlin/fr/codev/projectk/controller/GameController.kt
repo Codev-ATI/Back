@@ -26,26 +26,26 @@ class GameController {
     Return : gameId: String
      */
     @GetMapping("/createGame/{id}")
-    public fun createGame(@PathVariable id: String): ResponseEntity<String> {
+    fun createGame(@PathVariable id: String): ResponseEntity<String> {
 
-        try {
-            var id: String = roomManager.createGame(id)
-            return ResponseEntity(id, HttpStatus.OK)
+        return try {
+            var userId: String = roomManager.createGame(id)
+            ResponseEntity(userId, HttpStatus.OK)
         } catch (e: NoSuchElementException) {
-            return ResponseEntity("", HttpStatus.NOT_FOUND)
+            ResponseEntity("", HttpStatus.NOT_FOUND)
         }
     }
 
     @GetMapping("/joinGame/{roomId}/{pseudo}")
-    public fun joinGame(@PathVariable roomId: String, @PathVariable pseudo: String?): ResponseEntity<PlayerInfos> {
+    fun joinGame(@PathVariable roomId: String, @PathVariable pseudo: String?): ResponseEntity<PlayerInfos> {
 
-        try {
+        return try {
             if (pseudo.isNullOrEmpty()) {
                 throw NoSuchElementException()
             }
-            return ResponseEntity(roomManager.joinRoom(roomId, pseudo), HttpStatus.OK)
+            ResponseEntity(roomManager.joinRoom(roomId, pseudo), HttpStatus.OK)
         } catch (e: NoSuchElementException) {
-            return ResponseEntity(HttpStatus.BAD_REQUEST)
+            ResponseEntity(HttpStatus.BAD_REQUEST)
         }
     }
 

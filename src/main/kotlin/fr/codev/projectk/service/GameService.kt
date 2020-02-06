@@ -27,7 +27,7 @@ class GameService {
 
     fun createQuiz(quiz: Quiz): Quiz {
        // if (quiz.id == null) quiz.id = 2;
-        return quizRepository.save(quiz);
+        return quizRepository.save(quiz)
     }
 
     fun getQuiz(id: String): Quiz {

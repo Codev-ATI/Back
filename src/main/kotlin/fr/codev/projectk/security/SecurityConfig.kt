@@ -19,7 +19,7 @@ import java.util.*
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-class SecurityConfig(@Autowired private val loginService: LoginService) : WebSecurityConfigurerAdapter() {
+class SecurityConfig(@field:Autowired private val loginService: LoginService) : WebSecurityConfigurerAdapter() {
 
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {

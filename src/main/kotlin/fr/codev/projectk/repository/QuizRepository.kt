@@ -6,5 +6,4 @@ import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.data.mongodb.repository.Query
 import org.springframework.stereotype.Repository
 
-interface QuizRepository: MongoRepository<Quiz, String> {
-}
+interface QuizRepository: MongoRepository<Quiz, String>

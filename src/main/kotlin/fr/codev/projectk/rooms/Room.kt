@@ -16,7 +16,7 @@ class Room(id : String) {
     private var actualQuestion: Int = 0
     private var answers: HashMap<Int, ArrayList<PlayerAnswer>> = HashMap()
 
-    private var STATE: State = State.WAITING;
+    private var STATE: State = State.WAITING
 
     constructor(id: String, quiz: Quiz) : this(id) {
         this.quiz = quiz
@@ -102,7 +102,7 @@ class Room(id : String) {
 
     fun getNextQuestion(): SimpleQuestion {
 
-        return quiz.questions?.get(actualQuestion)?.let { question -> SimpleQuestion(actualQuestion, question.question, question.answers) }!!
+        return quiz.questions.get(actualQuestion).let { question -> SimpleQuestion(actualQuestion, question.question, question.answers) }
     }
 
     fun getActualQuestionIndex(): Int {
@@ -110,7 +110,7 @@ class Room(id : String) {
     }
 
     fun getAnswer():Int {
-        return (quiz.questions!!.get(actualQuestion).correct!!)
+        return (quiz.questions.get(actualQuestion).correct!!)
     }
 
     fun existNextQuestion(): Boolean {
@@ -119,7 +119,7 @@ class Room(id : String) {
 
     fun giveMeStats(): List<EndGameStats> {
 
-        var stats = ArrayList<EndGameStats>();
+        var stats = ArrayList<EndGameStats>()
 
         for (user in users.values) {
             stats.add(EndGameStats(user.id, user.pseudo, 0))
