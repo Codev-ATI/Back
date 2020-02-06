@@ -37,8 +37,8 @@ class LoginService(@field:Autowired private val userRepository: UserRepository,
     // METHODS FOR CONTROLLER
     fun login(email: String?, password: String?): Credentials {
         val user = userRepository.findByEmail(email)
-        return if (encoder.matches(password, user?.password)) {
-            var token = Jwts.builder()
+        if (encoder.matches(password, user?.password)) {
+            val token = Jwts.builder()
                     .setSubject(user?.pseudo)
                     .signWith(keyObj)
                     .setExpiration(Date.from(Instant.now().plusMillis(expirationPlus)))
@@ -55,7 +55,7 @@ class LoginService(@field:Autowired private val userRepository: UserRepository,
         if (userRepository.findByEmail(email) != null) {
             throw SNException("Username already exists !", HttpStatus.BAD_REQUEST, SpecialCode.LOGIN_USERNAME_ALREADY_EXISTS)
         }
-        var passwordVar = encoder.encode(password)
+        val passwordVar = encoder.encode(password)
         val user = User(pseudo, email, passwordVar)
         userRepository.save(user)
     }

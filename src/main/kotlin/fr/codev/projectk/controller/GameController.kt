@@ -29,7 +29,7 @@ class GameController {
     fun createGame(@PathVariable id: String): ResponseEntity<String> {
 
         return try {
-            var userId: String = roomManager.createGame(id)
+            val userId: String = roomManager.createGame(id)
             ResponseEntity(userId, HttpStatus.OK)
         } catch (e: NoSuchElementException) {
             ResponseEntity("", HttpStatus.NOT_FOUND)

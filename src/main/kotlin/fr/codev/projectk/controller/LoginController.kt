@@ -2,6 +2,7 @@ package fr.codev.projectk.controller
 
 import fr.codev.projectk.model.Credentials
 import fr.codev.projectk.service.LoginService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -10,7 +11,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/app")
 class LoginController(loginService: LoginService) {
 
-    private val loginService: LoginService
+    @Autowired
+    private val loginService: LoginService = loginService
 
     @GetMapping("/login")
     fun login(@RequestParam username: String?, @RequestParam password: String?): ResponseEntity<Credentials> {
@@ -23,7 +25,4 @@ class LoginController(loginService: LoginService) {
         return ResponseEntity("You're registered.", HttpStatus.OK)
     }
 
-    init {
-        this.loginService = loginService
-    }
 }

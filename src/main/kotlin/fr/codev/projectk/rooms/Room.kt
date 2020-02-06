@@ -16,7 +16,7 @@ class Room(id : String) {
     private var actualQuestion: Int = 0
     private var answers: HashMap<Int, ArrayList<PlayerAnswer>> = HashMap()
 
-    private var STATE: State = State.WAITING
+    private var state: State = State.WAITING
 
     constructor(id: String, quiz: Quiz) : this(id) {
         this.quiz = quiz
@@ -25,29 +25,25 @@ class Room(id : String) {
         this.quiz.questions.forEach { question: Question -> question.answers?.shuffle() }
 
         for (i in this.quiz.questions.indices) {
-            answers.put(i, ArrayList<PlayerAnswer>())
+            answers[i] = ArrayList()
 
         }
     }
 
     fun inGame(): Boolean {
-        return STATE.equals(State.GAME)
+        return state == State.GAME
     }
 
     fun getStatus(): List<PlayerStatus> {
         return users.values.toList()
     }
 
-    fun getQuiz(): Quiz {
-        return quiz
-    }
-
     fun join(pseudo: String): PlayerInfos {
 
-        var generatedUserId = UUID.randomUUID().toString().replace("-", "")
-        users.put(generatedUserId, PlayerStatus(generatedUserId, pseudo, false))
+        val generatedUserId = UUID.randomUUID().toString().replace("-", "")
+        users[generatedUserId] = PlayerStatus(generatedUserId, pseudo, false)
 
-        var status: PlayerStatus = users[generatedUserId]!!
+        val status: PlayerStatus = users[generatedUserId]!!
 
         return PlayerInfos(generatedUserId, status.pseudo, quiz.title, quiz.questions.size)
     }
@@ -56,20 +52,8 @@ class Room(id : String) {
         users.remove(id)
     }
 
-    fun isReady(id: String): Boolean {
-        return users.get(id)!!.ready
-    }
-
-    fun isNotHere(id: String): Boolean {
-        return users.get(id) == null
-    }
-
-    fun leave(id: String) {
-        users.remove(id)
-    }
-
     fun setReady(id: String): List<PlayerStatus> {
-        users.get(id)!!.ready = true
+        users[id]!!.ready = true
 
         return users.values.toList()
     }
@@ -79,21 +63,19 @@ class Room(id : String) {
         users.values.forEach { user -> ready = ready && user.ready }
 
         if (ready) {
-            STATE = State.GAME
+            state = State.GAME
         }
 
         return ready
     }
 
     fun answer(id: String, questionId: Int, answer: Int) {
-        answers.get(questionId)?.add(PlayerAnswer(id, answer))
+        answers[questionId]?.add(PlayerAnswer(id, answer))
     }
 
     fun everyoneAnswered(questionId: Int): Boolean {
 
-        var bool = answers[questionId]?.size == users.size
-
-        return bool
+        return answers[questionId]?.size == users.size
     }
 
     fun nextQuestion() {
@@ -102,7 +84,7 @@ class Room(id : String) {
 
     fun getNextQuestion(): SimpleQuestion {
 
-        return quiz.questions.get(actualQuestion).let { question -> SimpleQuestion(actualQuestion, question.question, question.answers) }
+        return quiz.questions[actualQuestion].let { question -> SimpleQuestion(actualQuestion, question.question, question.answers) }
     }
 
     fun getActualQuestionIndex(): Int {
@@ -110,7 +92,7 @@ class Room(id : String) {
     }
 
     fun getAnswer():Int {
-        return (quiz.questions.get(actualQuestion).correct!!)
+        return (quiz.questions[actualQuestion].correct!!)
     }
 
     fun existNextQuestion(): Boolean {
@@ -119,13 +101,13 @@ class Room(id : String) {
 
     fun giveMeStats(): List<EndGameStats> {
 
-        var stats = ArrayList<EndGameStats>()
+        val stats = ArrayList<EndGameStats>()
 
         for (user in users.values) {
             stats.add(EndGameStats(user.id, user.pseudo, 0))
         }
 
-        answers.forEach { key, value ->
+        answers.forEach { (key, value) ->
             for (answer in value) {
                 if (quiz.questions[key].correct == answer.answer) {
                     stats.find { endGameStats -> endGameStats.id == answer.userId }?.increment()

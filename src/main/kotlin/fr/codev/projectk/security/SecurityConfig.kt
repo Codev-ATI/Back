@@ -40,15 +40,15 @@ class SecurityConfig(@field:Autowired private val loginService: LoginService) : 
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = Arrays.asList("*")
-        configuration.allowedMethods = Arrays.asList("HEAD",
+        configuration.allowedOrigins = listOf("*")
+        configuration.allowedMethods = listOf("HEAD",
                 "GET", "POST", "PUT", "DELETE", "PATCH")
         // setAllowCredentials(true) is important, otherwise:
         // The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*' when the request's credentials mode is 'include'.
         configuration.allowCredentials = true
         // setAllowedHeaders is important! Without it, OPTIONS preflight request
         // will fail with 403 Invalid CORS request
-        configuration.allowedHeaders = Arrays.asList("Authorization", "Cache-Control", "Content-Type", "Accept")
+        configuration.allowedHeaders = listOf("Authorization", "Cache-Control", "Content-Type", "Accept")
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)
         return source
