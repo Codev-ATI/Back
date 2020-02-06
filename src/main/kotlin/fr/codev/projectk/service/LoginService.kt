@@ -44,7 +44,7 @@ class LoginService(@field:Autowired private val userRepository: UserRepository,
                     .setExpiration(Date.from(Instant.now().plusMillis(expirationPlus)))
                     .compact()
 
-            return Credentials(token, user?.pseudo)
+            return Credentials(token)
         } else {
             throw SNException("Bad credentials !", HttpStatus.BAD_REQUEST, SpecialCode.LOGIN_BAD_CREDENTIALS)
         }
