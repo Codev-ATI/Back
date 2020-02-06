@@ -5,10 +5,13 @@ import fr.codev.projectk.model.Question
 import fr.codev.projectk.model.Quiz
 import fr.codev.projectk.model.SimpleQuestion
 import fr.codev.projectk.robj.*
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class Room(id : String) {
 
-    private var users: HashMap<Int, PlayerStatus> = HashMap()
+    private var users: HashMap<String, PlayerStatus> = HashMap()
     private lateinit var  quiz: Quiz
     private var actualQuestion: Int = 0
     private var answers: HashMap<Int, ArrayList<PlayerAnswer>> = HashMap()
@@ -40,30 +43,32 @@ class Room(id : String) {
     }
 
     fun join(pseudo: String): PlayerInfos {
-        users.put(users.size, PlayerStatus(users.size, pseudo, false))
 
-        var status: PlayerStatus = users[users.size - 1]!!
+        var generatedUserId = UUID.randomUUID().toString().replace("-", "")
+        users.put(generatedUserId, PlayerStatus(generatedUserId, pseudo, false))
 
-        return PlayerInfos(status.id, status.pseudo, quiz.title, quiz.questions.size)
+        var status: PlayerStatus = users[generatedUserId]!!
+
+        return PlayerInfos(generatedUserId, status.pseudo, quiz.title, quiz.questions.size)
     }
 
-    fun quit(id: Int) {
+    fun quit(id: String) {
         users.remove(id)
     }
 
-    fun isReady(id: Int): Boolean {
+    fun isReady(id: String): Boolean {
         return users.get(id)!!.ready
     }
 
-    fun isNotHere(id: Int): Boolean {
+    fun isNotHere(id: String): Boolean {
         return users.get(id) == null
     }
 
-    fun leave(id: Int) {
+    fun leave(id: String) {
         users.remove(id)
     }
 
-    fun setReady(id: Int): List<PlayerStatus> {
+    fun setReady(id: String): List<PlayerStatus> {
         users.get(id)!!.ready = true
 
         return users.values.toList()
@@ -80,7 +85,7 @@ class Room(id : String) {
         return ready
     }
 
-    fun answer(id: Int, questionId: Int, answer: Int) {
+    fun answer(id: String, questionId: Int, answer: Int) {
         answers.get(questionId)?.add(PlayerAnswer(id, answer))
     }
 
@@ -116,14 +121,14 @@ class Room(id : String) {
 
         var stats = ArrayList<EndGameStats>();
 
-        for (i in users.values.indices) {
-            stats.add(EndGameStats(i, users[i]!!.pseudo, 0))
+        for (user in users.values) {
+            stats.add(EndGameStats(user.id, user.pseudo, 0))
         }
 
         answers.forEach { key, value ->
             for (answer in value) {
                 if (quiz.questions[key].correct == answer.answer) {
-                    stats[answer.userId].increment()
+                    stats.find { endGameStats -> endGameStats.id == answer.userId }?.increment()
                 }
             }
         }

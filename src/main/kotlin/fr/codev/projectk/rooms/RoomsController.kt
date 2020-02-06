@@ -26,7 +26,7 @@ public class RoomsController() {
     @MessageMapping("/rooms/ready/{roomId}")
     @SendTo("/topic/players/{roomId}")
     public fun readyUser(@DestinationVariable roomId: String, id: String): List<PlayerStatus>? {
-        return roomManager.ready(roomId, Integer.parseInt(id))
+        return roomManager.ready(roomId, id)
     }
 
     @MessageMapping("/rooms/answer/{roomId}")
@@ -38,6 +38,6 @@ public class RoomsController() {
     @MessageMapping("/rooms/quit/{roomId}")
     public fun quit(@DestinationVariable roomId: String, id: String) {
 
-        roomManager.quit(roomId, Integer.parseInt(id))
+        roomManager.quit(roomId, id)
     }
 }

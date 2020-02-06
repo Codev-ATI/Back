@@ -37,9 +37,12 @@ class GameController {
     }
 
     @GetMapping("/joinGame/{roomId}/{pseudo}")
-    public fun createGame(@PathVariable roomId: String, @PathVariable pseudo: String): ResponseEntity<PlayerInfos> {
+    public fun joinGame(@PathVariable roomId: String, @PathVariable pseudo: String?): ResponseEntity<PlayerInfos> {
 
         try {
+            if (pseudo.isNullOrEmpty()) {
+                throw NoSuchElementException()
+            }
             return ResponseEntity(roomManager.joinRoom(roomId, pseudo), HttpStatus.OK)
         } catch (e: NoSuchElementException) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)

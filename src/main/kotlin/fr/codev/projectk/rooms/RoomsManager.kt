@@ -36,7 +36,7 @@ class RoomsManager {
         return room?.join(pseudo)!!
     }
 
-    fun  quit(roomId: String, id: Int) {
+    fun  quit(roomId: String, id: String) {
         var room = roomsList[roomId]
 
         if (room == null) {
@@ -101,7 +101,7 @@ class RoomsManager {
         return generateId
     }
 
-    @Synchronized fun ready(roomId: String, id: Int): List<PlayerStatus>? {
+    @Synchronized fun ready(roomId: String, id: String): List<PlayerStatus>? {
         var room = roomsList[roomId]
 
         if(room == null || room!!.inGame()) {
@@ -119,14 +119,14 @@ class RoomsManager {
         return list
     }
 
-    fun answer(roomId: String, id: Int, questionId: Int, answer: Int) {
+    fun answer(roomId: String, userId: String, questionId: Int, answer: Int) {
         var room = roomsList[roomId]
 
         if (room == null || !room!!.inGame()) {
             return
         }
 
-        room?.answer(id, questionId, answer)
+        room?.answer(userId, questionId, answer)
 
         if (room?.everyoneAnswered(questionId)) {
             questionEnding(roomId, room)
