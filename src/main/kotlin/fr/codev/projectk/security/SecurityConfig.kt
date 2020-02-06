@@ -26,7 +26,6 @@ class SecurityConfig(@field:Autowired private val loginService: LoginService) : 
         http.csrf().disable()
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         http.authorizeRequests()
-                .antMatchers("/auth/**").denyAll()
                 .anyRequest().permitAll()
         http.apply(JwtTokenFilterConfigurer(loginService))
         http.exceptionHandling().accessDeniedPage("/login")
