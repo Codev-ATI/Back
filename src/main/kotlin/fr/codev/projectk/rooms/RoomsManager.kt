@@ -23,7 +23,7 @@ class RoomsManager {
     fun  joinRoom(roomId: String, pseudo: String): PlayerInfos {
         val room = roomsList[roomId]
 
-        if (room == null) {
+        if (room == null || room.inGame()) {
             throw NoSuchElementException()
         }
 
